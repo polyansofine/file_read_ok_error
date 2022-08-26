@@ -1,50 +1,39 @@
-#![allow(dead_code)]              // <1>
+//! Simulating files one step at a time.     // <1>
 
-use std::fmt;                     // <2>
-use std::fmt::{Display};          // <3>
-
-#[derive(Debug,PartialEq)]
-enum FileState {
-  Open,
-  Closed,
-}
-
+/// Represents a "file",
+/// which probably lives on a file system.   // <2>
 #[derive(Debug)]
-struct File {
+pub struct File {
   name: String,
   data: Vec<u8>,
-  state: FileState,
-}
-
-impl Display for FileState {
-   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-     match *self {
-         FileState::Open => write!(f, "OPEN"),      // <4>
-         FileState::Closed => write!(f, "CLOSED"),  // <4>
-     }
-   }
-}
-
-impl Display for File {
-   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-      write!(f, "<{} ({})>",
-	         self.name, self.state)              // <5>
-   }
 }
 
 impl File {
-  fn new(name: &str) -> File {
+  /// New files are assumed to be empty, but a name is required.
+  pub fn new(name: &str) -> File {
     File {
-        name: String::from(name),
-        data: Vec::new(),
-        state: FileState::Open,
+      name: String::from(name),
+      data: Vec::new(),
     }
+  }
+
+  /// Returns the file's length in bytes.
+  pub fn len(&self) -> usize {
+    self.data.len()
+  }
+
+  /// Returns the file's name.
+  pub fn name(&self) -> String {
+    self.name.clone()
   }
 }
 
 fn main() {
-  let f6 = File::new("f6.txt");
-  //...
-  println!("{:?}", f6);           // <6>
-  println!("{}", f6);             // <7>
+  let f1 = File::new("f1.txt");
+
+  let f1_name = f1.name();
+  let f1_length = f1.len();
+
+  println!("{:?}", f1);
+  println!("{} is {} bytes long", f1_name, f1_length);
 }
