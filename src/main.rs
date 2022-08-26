@@ -58,4 +58,5 @@ fn main() {
     let text = String::from_utf8_lossy(&buffer);
     println!("{:?}", f4);
     println!("{} is {} bytes long", &f4.name, f4_length);
-    println!("{}", text);}
+    println!("{}", text);
+}
