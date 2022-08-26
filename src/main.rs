@@ -1,62 +1,33 @@
-use rand::{thread_rng, Rng};
-
-fn one_in(denominator:u32) -> bool {
-    thread_rng().gen_ratio(1, denominator)
-}
 #[derive(Debug)]
-struct File {
-    name:String,
-    data:Vec<u8>,
+enum Event {
+    Update,
+    Delete,
+    Unknown,
 }
 
-impl File {
-    fn new(name:&str) -> File {
-        File{
-            name:String::from(name),
-            data:Vec::new(),
-        }
-    }
+type Message = String;
 
-    fn new_with_data(name:&str,data:&Vec<u8>) -> File {
-        let mut f= File::new(name);
-        f.data = data.clone();
-        f
+fn parse_log(line:&str) -> (Event,Message) {
+    let parts:Vec<_> = line.splitn(2, ' ').collect();
+    if parts.len() == 1 {
+        return (Event::Unknown,String::from(line));
     }
-
-    fn read(self:&File,save_to: &mut Vec<u8>) -> Result<usize,String> {
-        let mut tmp = self.data.clone();
-        let read_length = tmp.len();
-        save_to.reserve(read_length);
-        save_to.append(&mut tmp);
-        Ok(read_length)
+    let event = parts[0];
+    let rest = String::from(parts[1]);
+    match event {
+        "UPDATE" | "update" => (Event::Update,rest),
+        "DELETE" | "delete" => (Event::Delete,rest),
+        _ => (Event::Unknown,String::from(line)),
     }
-
-}
-
-fn open(f:File) ->Result<File, String> {
-    if one_in(10_000) {
-        let err_msg = String::from("Permission denied");
-        return Err(err_msg);
-    }
-    Ok(f)
-}
-fn close(f: File) -> Result<File, String> {
-  if one_in(100_000) {                             
-    let err_msg = String::from("Interrupted by signal!");
-    return Err(err_msg);
-  }
-  Ok(f)
 }
 
 fn main() {
-    let f4_data = vec![11,23,23,12,42,24,38];
-    let mut f4 = File::new_with_data("4.txt", &f4_data);
-    let mut buffer = vec![];
-    f4 = open(f4).unwrap();
-    let f4_length = f4.read(&mut buffer).unwrap();
-    f4 = close(f4).unwrap();
-    let text = String::from_utf8_lossy(&buffer);
-    println!("{:?}", f4);
-    println!("{} is {} bytes long", &f4.name, f4_length);
-    println!("{}", text);
+    let log = "BEGIN Transaction XK342 
+UPDATE 234:LS/32231 {\"price\": 31.00} -> {\"price\": 40.00} 
+DELETE 342:LO/22111";
+    for line in log.lines() {
+        let parse_result = parse_log(line);
+        println!("{:?}",parse_result);
+    }
+
 }
