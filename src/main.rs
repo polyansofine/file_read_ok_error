@@ -1,39 +1,37 @@
-//! Simulating files one step at a time.     // <1>
-
-/// Represents a "file",
-/// which probably lives on a file system.   // <2>
 #[derive(Debug)]
-pub struct File {
-  name: String,
-  data: Vec<u8>,
+struct CubeSat {
+    id:u64,
+    mailbox:Mailbox,
+}
+#[derive(Debug)]
+struct Mailbox {
+    messages : Vec<Message>
+}
+type Message = String;
+struct GroundStation;
+
+impl GroundStation {
+    fn send(&self,to:&mut CubeSat,msg:Message){
+        to.mailbox.messages.push(msg);
+    }
 }
 
-impl File {
-  /// New files are assumed to be empty, but a name is required.
-  pub fn new(name: &str) -> File {
-    File {
-      name: String::from(name),
-      data: Vec::new(),
+impl CubeSat {
+    fn recv(&mut self) -> Option<Message> {
+        self.mailbox.messages.pop()
     }
-  }
-
-  /// Returns the file's length in bytes.
-  pub fn len(&self) -> usize {
-    self.data.len()
-  }
-
-  /// Returns the file's name.
-  pub fn name(&self) -> String {
-    self.name.clone()
-  }
 }
 
 fn main() {
-  let f1 = File::new("f1.txt");
-
-  let f1_name = f1.name();
-  let f1_length = f1.len();
-
-  println!("{:?}", f1);
-  println!("{} is {} bytes long", f1_name, f1_length);
+    let base = GroundStation{};
+    let mut sat_a = CubeSat {
+        id:0,
+        mailbox:Mailbox { messages: vec![] },
+    };
+    println!("t0: {:?}",sat_a);
+    base.send(&mut sat_a, Message::from("hello there!"));
+    println!("t1: {:?}", sat_a);
+    let msg = sat_a.recv();
+    println!("t2: {:?}", sat_a);
+    println!("msg: {:?}",msg);
 }
